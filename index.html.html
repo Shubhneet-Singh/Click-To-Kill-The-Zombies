@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Zombie Clicker — 10,000 Levels</title>
+<!--
+  AD SETUP — Google AdSense
+  1. Once your GitHub Pages site is approved by AdSense, replace BOTH
+     "ca-pub-XXXXXXXXXXXXXXXX" below (there are two) with your real
+     AdSense publisher ID.
+  2. Replace "XXXXXXXXXX" in the data-ad-slot line further down with
+     the ad unit slot ID AdSense gives you.
+  3. Until you do that, this code sits here harmlessly and no ads show.
+-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+<style>
+  :root{
+    --panel:#2c2c54; --panel-dark:#1f1f3d; --outline:#0a0a12;
+    --yellow:#ffd32a; --red:#ff4757; --green:#2ed573; --green2:#7bed9f;
+    --blue:#3ab0ff; --purple:#9b59d0; --orange:#ff9f43; --white:#fff8ec;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none;}
+  html,body{height:100%; margin:0; overflow:hidden; background:#000;
+    font-family: Verdana, 'Segoe UI', system-ui, sans-serif;}
+  #game{position:fixed; top:0; left:0; right:0; bottom:54px; display:flex; flex-direction:column;
+    background: linear-gradient(180deg,#ff9f43 0%, #e8735c 30%, #8e5aa8 62%, #4b2f6b 100%);}
+  #adBanner{position:fixed; left:0; right:0; bottom:0; height:54px; background:#111;
+    display:flex; align-items:center; justify-content:center; z-index:15; overflow:hidden;
+    border-top:2px solid #333;}
+
+  .comic-text{color:var(--white); -webkit-text-stroke: 2px var(--outline); text-stroke:2px var(--outline);
+    font-weight:900; letter-spacing:0.5px; text-shadow: 3px 3px 0 var(--outline);}
+
+  /* ---------- TOP HUD ---------- */
+  #topHud{display:flex; align-items:center; gap:6px; padding:8px 8px 4px; flex-wrap:nowrap; z-index:5;}
+  .badge{background:var(--panel); border:3px solid var(--outline); border-radius:14px;
+    padding:6px 10px; display:flex; align-items:center; gap:6px; box-shadow:0 3px 0 var(--outline);
+    font-weight:800; color:var(--white); font-size:14px; white-space:nowrap;}
+  .badge .val{color:var(--yellow); font-weight:900;}
+  #levelBadge{background:linear-gradient(180deg,#ff6b6b,#c0392b);}
+  #coinBadge{background:linear-gradient(180deg,#ffd32a,#e6a800); color:#3d2b00;}
+  #coinBadge .val{color:#3d2b00;}
+  #scoreBadge{background:linear-gradient(180deg,#54a0ff,#2e6bd6);}
+  .spacer{flex:1;}
+  .iconBtn{width:42px; height:42px; border-radius:50%; border:3px solid var(--outline);
+    background: linear-gradient(180deg,#ffd32a,#e6a800); font-size:20px; display:flex;
+    align-items:center; justify-content:center; box-shadow:0 3px 0 var(--outline); cursor:pointer; flex:0 0 auto;}
+  .iconBtn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--outline);}
+  #pauseBtn{background:linear-gradient(180deg,#b0b0b0,#7d7d7d);}
+
+  /* ---------- STATUS BARS ---------- */
+  #statusBars{padding:2px 10px 6px; display:flex; flex-direction:column; gap:4px; z-index:5;}
+  .barRow{display:flex; align-items:center; gap:6px;}
+  .barLabel{font-size:12px; width:20px; text-align:center;}
+  .barTrack{flex:1; height:16px; background:var(--panel-dark); border:2px solid var(--outline);
+    border-radius:8px; overflow:hidden; position:relative;}
+  .barFill{height:100%; width:100%; transition:width .15s ease-out;}
+  #hpFill{background:linear-gradient(90deg,#ff4757,#ff6b81);}
+  #shieldFill{background:linear-gradient(90deg,#3ab0ff,#8ee6ff);}
+  #bossWrap{display:none; padding:2px 10px; z-index:5;}
+  #bossName{text-align:center; font-size:13px; margin-bottom:2px;}
+  #bossFill{background:linear-gradient(90deg,#9b1a1a,#ff4d4d);}
+
+  /* ---------- CANVAS ---------- */
+  #canvasWrap{flex:1; position:relative; overflow:hidden;}
+  canvas{position:absolute; top:0; left:0; width:100%; height:100%; touch-action:none;}
+
+  /* ---------- BOTTOM HUD ---------- */
+  #bottomHud{padding:6px 10px 10px; z-index:5;}
+  #progressRow{display:flex; align-items:center; gap:6px; margin-bottom:6px;}
+  #progressTrack{flex:1; height:14px; background:var(--panel-dark); border:2px solid var(--outline);
+    border-radius:7px; overflow:hidden;}
+  #progressFill{height:100%; width:0%; background:linear-gradient(90deg,#2ed573,#7bed9f); transition:width .2s;}
+  #gunRow{display:flex; align-items:center; justify-content:space-between; background:var(--panel);
+    border:3px solid var(--outline); border-radius:14px; padding:6px 12px; box-shadow:0 3px 0 var(--outline);}
+  #gunInfo{display:flex; align-items:center; gap:8px; font-weight:800; color:var(--white); font-size:14px;}
+  #gunIcon{font-size:22px;}
+  #shopBtn{background:linear-gradient(180deg,#2ed573,#1d9e5a); border:3px solid var(--outline);
+    color:var(--white); font-weight:900; padding:8px 16px; border-radius:12px; box-shadow:0 3px 0 var(--outline);
+    font-size:14px; cursor:pointer;}
+  #shopBtn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--outline);}
+
+  /* ---------- OVERLAYS ---------- */
+  .overlay{position:fixed; inset:0; background:rgba(10,8,20,.72); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:16px;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--panel); border:4px solid var(--outline); border-radius:20px; width:100%;
+    max-width:480px; max-height:86vh; overflow:hidden; display:flex; flex-direction:column;
+    box-shadow:0 8px 0 var(--outline);}
+  .modalHead{padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+    background:var(--panel-dark);}
+  .modalHead h2{margin:0; font-size:20px;}
+  .closeX{width:34px; height:34px; border-radius:50%; border:3px solid var(--outline);
+    background:var(--red); color:#fff; font-weight:900; cursor:pointer;}
+  .tabs{display:flex; gap:6px; padding:10px 12px 0;}
+  .tabBtn{flex:1; padding:8px; border-radius:10px 10px 0 0; border:3px solid var(--outline); border-bottom:none;
+    background:var(--panel-dark); color:#bdbde0; font-weight:800; cursor:pointer; font-size:14px;}
+  .tabBtn.active{background:var(--yellow); color:#3d2b00;}
+  .listWrap{overflow-y:auto; padding:10px 12px 16px; flex:1;}
+  .shopItem{display:flex; align-items:center; gap:10px; background:var(--panel-dark); border:3px solid var(--outline);
+    border-radius:14px; padding:8px 10px; margin-bottom:8px;}
+  .shopIcon{font-size:26px; width:38px; text-align:center; flex:0 0 auto;}
+  .shopInfo{flex:1; color:var(--white);}
+  .shopInfo .name{font-weight:900; font-size:14px;}
+  .shopInfo .stat{font-size:12px; color:#c9c9e8;}
+  .shopBtnItem{padding:8px 12px; border-radius:10px; border:3px solid var(--outline); font-weight:900;
+    font-size:12px; cursor:pointer; white-space:nowrap;}
+  .st-buy{background:var(--yellow); color:#3d2b00;}
+  .st-equip{background:var(--blue); color:#fff;}
+  .st-equipped{background:var(--green); color:#08340d; cursor:default;}
+  .st-locked{background:#555; color:#ccc; cursor:not-allowed;}
+
+  #pauseModal .modal, #confirmModal .modal, #devModal .modal{max-width:340px;}
+  .menuBtn{display:block; width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:3px solid var(--outline);
+    background:var(--blue); color:#fff; font-weight:900; font-size:15px; cursor:pointer; box-shadow:0 3px 0 var(--outline);}
+  .menuBtn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--outline);}
+  .menuBtn.danger{background:var(--red);}
+  .menuBtn.grey{background:#7d7d7d;}
+  #jumpRow{display:flex; gap:6px; margin-bottom:10px;}
+  #jumpInput{flex:1; padding:10px; border-radius:10px; border:3px solid var(--outline); font-weight:800; text-align:center;}
+
+  /* full-screen text overlays */
+  .flashOverlay{position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    flex-direction:column; z-index:60; pointer-events:none; text-align:center;}
+  .flashOverlay.show{display:flex;}
+  #levelUpOverlay .big{font-size:52px; color:var(--yellow); -webkit-text-stroke:3px var(--outline);
+    text-shadow:4px 4px 0 var(--outline); animation:popIn .35s ease-out;}
+  #levelUpOverlay .sub{font-size:26px; color:#fff; -webkit-text-stroke:2px var(--outline); margin-top:6px;}
+  #levelUpOverlay .coins{font-size:20px; color:var(--yellow); margin-top:10px; -webkit-text-stroke:1.5px var(--outline);}
+  #bossWarnOverlay .big{font-size:40px; color:var(--red); -webkit-text-stroke:3px var(--outline);
+    animation:shake .25s infinite;}
+  #finalBanner{position:fixed; top:70px; left:0; right:0; text-align:center; z-index:20; pointer-events:none; display:none;}
+  #finalBanner.show{display:block;}
+  #finalBanner span{font-size:26px; color:var(--red); -webkit-text-stroke:2px var(--outline);
+    text-shadow:3px 3px 0 var(--outline); animation:pulse 1s infinite;}
+  #toast{position:fixed; bottom:110px; left:50%; transform:translateX(-50%); background:var(--red); color:#fff;
+    font-weight:900; padding:10px 18px; border-radius:12px; border:3px solid var(--outline); z-index:70;
+    display:none; box-shadow:0 3px 0 var(--outline);}
+  #toast.show{display:block; animation:popIn .2s ease-out;}
+
+  #victoryOverlay{position:fixed; inset:0; background:radial-gradient(circle at 50% 30%, #ffd32a 0%, #b8391a 55%, #1a0a0a 100%);
+    display:none; align-items:center; justify-content:center; z-index:80; padding:20px; overflow-y:auto;}
+  #victoryOverlay.show{display:flex;}
+  #victoryCard{background:var(--panel); border:4px solid var(--outline); border-radius:22px; padding:22px;
+    max-width:440px; width:100%; text-align:center; box-shadow:0 8px 0 var(--outline);}
+  #victoryCard h1{font-size:26px; color:var(--yellow); -webkit-text-stroke:2px var(--outline); margin:0 0 6px;}
+  #victoryCard .statRow{display:flex; justify-content:space-between; color:var(--white); font-size:14px;
+    padding:6px 4px; border-bottom:1px dashed #555;}
+  #victoryCard .statRow b{color:var(--yellow);}
+
+  @keyframes popIn{0%{transform:scale(.4); opacity:0;} 70%{transform:scale(1.12);} 100%{transform:scale(1); opacity:1;}}
+  @keyframes shake{0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);}}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.4;}}
+  @keyframes screenShake{0%,100%{transform:translate(0,0);} 25%{transform:translate(-4px,3px);} 50%{transform:translate(4px,-3px);} 75%{transform:translate(-3px,-4px);}}
+  .shaking{animation:screenShake .35s;}
+</style>
+</head>
+<body>
+<div id="game">
+
+  <div id="topHud">
+    <div class="badge" id="levelBadge">📊 LV <span class="val" id="levelVal">1</span></div>
+    <div class="badge" id="coinBadge">🪙 <span class="val" id="coinVal">0</span></div>
+    <div class="badge" id="scoreBadge">⭐ <span class="val" id="scoreVal">0</span></div>
+    <div class="spacer"></div>
+    <div class="iconBtn" id="shopIconBtn">🛒</div>
+    <div class="iconBtn" id="pauseBtn">⏸️</div>
+  </div>
+
+  <div id="statusBars">
+    <div class="barRow"><span class="barLabel">❤️</span><div class="barTrack"><div class="barFill" id="hpFill"></div></div></div>
+    <div class="barRow"><span class="barLabel">🛡️</span><div class="barTrack"><div class="barFill" id="shieldFill"></div></div></div>
+  </div>
+
+  <div id="bossWrap">
+    <div id="bossName" class="comic-text">👹 BOSS</div>
+    <div class="barTrack" style="height:20px;"><div class="barFill" id="bossFill"></div></div>
+  </div>
+
+  <div id="finalBanner"><span>🔥 FINAL LEVEL — 10,000 🔥</span></div>
+  <div id="challengeBanner" style="display:none; position:fixed; top:70px; left:0; right:0; text-align:center; z-index:20; pointer-events:none;">
+    <span class="comic-text" id="challengeText" style="font-size:20px; color:var(--yellow);"></span>
+  </div>
+
+  <div id="canvasWrap">
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <div id="bottomHud">
+    <div id="progressRow">
+      <div id="progressTrack"><div id="progressFill"></div></div>
+    </div>
+    <div id="gunRow">
+      <div id="gunInfo"><span id="gunIcon">🔫</span><span id="gunName">Basic Gun</span><span>💥<span id="gunDmg">5</span></span></div>
+      <div id="shopBtn">SHOP</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- AD BANNER — see setup comment near top of <head> for how to activate -->
+<div id="adBanner">
+  <ins class="adsbygoogle"
+       style="display:inline-block;width:320px;height:50px;"
+       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+       data-ad-slot="XXXXXXXXXX"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<!-- SHOP MODAL -->
+<div class="overlay" id="shopOverlay">
+  <div class="modal">
+    <div class="modalHead"><h2 class="comic-text">🛒 SHOP</h2><div class="closeX" id="shopClose">✕</div></div>
+    <div class="tabs">
+      <div class="tabBtn active" id="tabGuns">🔫 GUNS</div>
+      <div class="tabBtn" id="tabShields">🛡️ SHIELDS</div>
+    </div>
+    <div class="listWrap" id="shopList"></div>
+  </div>
+</div>
+
+<!-- PAUSE MODAL -->
+<div class="overlay" id="pauseOverlay">
+  <div class="modal" id="pauseModal">
+    <div class="modalHead"><h2 class="comic-text">⏸️ PAUSED</h2><div class="closeX" id="pauseClose">✕</div></div>
+    <div class="listWrap">
+      <button class="menuBtn" id="resumeBtn">▶️ Resume</button>
+      <div style="display:flex; gap:8px; margin-bottom:10px;">
+        <div class="badge" style="flex:1; justify-content:center;">🏆 Best <span class="val" id="bestScoreVal">0</span></div>
+        <div class="badge" style="flex:1; justify-content:center;">⏱️ Best <span class="val" id="bestChallengeVal">0</span></div>
+      </div>
+      <button class="menuBtn" id="challengeBtn" style="background:var(--purple);">⏱️ 15-Second Challenge</button>
+      <button class="menuBtn grey" id="soundBtn">🔊 Sound: ON</button>
+      <button class="menuBtn grey" onclick="location.href='index.html'">🏠 Game Page Index</button>
+      <div id="jumpRow">
+        <input id="jumpInput" type="number" min="1" max="10000" placeholder="Level 1-10000">
+        <button class="menuBtn" style="width:auto; margin:0; padding:10px 14px;" id="jumpBtn">Go</button>
+      </div>
+      <button class="menuBtn danger" id="resetBtn">🗑️ Reset Progress</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal" id="confirmModal">
+    <div class="modalHead"><h2 class="comic-text">⚠️ Are you sure?</h2></div>
+    <div class="listWrap">
+      <p style="color:#fff; font-size:14px;">This will erase ALL progress — level, coins, guns and shields. This cannot be undone.</p>
+      <button class="menuBtn danger" id="confirmYes">Yes, erase everything</button>
+      <button class="menuBtn grey" id="confirmNo">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="flashOverlay" id="levelUpOverlay">
+  <div class="big comic-text">LEVEL UP!</div>
+  <div class="sub comic-text" id="levelUpNum">Level 2</div>
+  <div class="coins comic-text" id="levelUpCoins">+10 coins</div>
+</div>
+
+<div class="flashOverlay" id="bossWarnOverlay">
+  <div class="big comic-text">⚠️ BOSS INCOMING ⚠️</div>
+</div>
+
+<div id="victoryOverlay">
+  <div id="victoryCard">
+    <h1>🏆 YOU BEAT ALL 10,000 LEVELS! 🏆</h1>
+    <div class="statRow"><span>Final Score</span><b id="vScore">0</b></div>
+    <div class="statRow"><span>Total Zombies Defeated</span><b id="vZombies">0</b></div>
+    <div class="statRow"><span>Total Coins Earned</span><b id="vCoins">0</b></div>
+    <div class="statRow"><span>Highest Gun Unlocked</span><b id="vGun">-</b></div>
+    <div class="statRow"><span>Highest Shield Unlocked</span><b id="vShield">-</b></div>
+    <div class="statRow"><span>Total Play Time</span><b id="vTime">0</b></div>
+    <div class="statRow"><span>Completion</span><b>100%</b></div>
+    <button class="menuBtn" style="margin-top:16px;" id="victoryClose">🎉 Nice!</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================= DATA ======================= */
+const WEAPONS = [
+  {id:'basic',     name:'Basic Gun',     dmg:5,   price:0,    color:'#b0b0b0'},
+  {id:'improved',  name:'Improved Gun',  dmg:10,  price:100,  color:'#3ab0ff'},
+  {id:'powerful',  name:'Powerful Gun',  dmg:20,  price:300,  color:'#2ed573'},
+  {id:'advanced',  name:'Advanced Gun',  dmg:35,  price:750,  color:'#9b59d0'},
+  {id:'elite',     name:'Elite Gun',     dmg:50,  price:1500, color:'#ff9f43'},
+  {id:'legendary', name:'Legendary Gun', dmg:75,  price:3500, color:'#ff4757'},
+  {id:'ultimate',  name:'Ultimate Gun',  dmg:100, price:8000, color:'#ffd32a'},
+];
+const SHIELDS = [
+  {id:'basic',       name:'Basic Shield',       hp:25,  price:150},
+  {id:'reinforced',  name:'Reinforced Shield',  hp:50,  price:500},
+  {id:'heavy',       name:'Heavy Shield',       hp:100, price:1500},
+  {id:'ultimate',    name:'Ultimate Shield',    hp:200, price:4000},
+];
+const BOSS_LEVELS = [10,25,50,100,250,500,1000,2500,5000,7500,10000];
+const MAX_LEVEL = 10000;
+const MAX_PLAYER_HP = 100;
+
+/* ======================= STATE ======================= */
+let state = {
+  level: 1,
+  highestLevel: 1,
+  coins: 0,
+  totalCoinsEarned: 0,
+  score: 0,
+  totalZombiesDefeated: 0,
+  playTimeSeconds: 0,
+  gunsOwned: ['basic'],
+  equippedGun: 'basic',
+  shieldsOwned: [],
+  equippedShield: null,
+  soundOn: true,
+  finished: false,
+  highScore: 0,
+  challengeBest: 0,
+};
+
+let playerHP = MAX_PLAYER_HP;
+let shieldHP = 0;
+let killsThisLevel = 0;
+let requiredKills = 5;
+let isBossLevel = false;
+let bossActive = false;
+let boss = null;
+let gamePaused = false;
+let inWarning = false;
+let bossMusicTimer = null;
+
+/* ======================= HELPERS ======================= */
+function currentGun(){ return WEAPONS.find(w=>w.id===state.equippedGun) || WEAPONS[0]; }
+function currentShieldDef(){ return SHIELDS.find(s=>s.id===state.equippedShield) || null; }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function randInt(min,max){ return Math.floor(rand(min,max+1)); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+function getLevelConfig(level){
+  return {
+    zombieHP: Math.round(50 + level*0.35),
+    speedMin: 18 + Math.min(level*0.14, 130),
+    speedMax: 36 + Math.min(level*0.22, 200),
+    spawnInterval: Math.max(1700 - level*0.13, 340),
+    maxOnScreen: Math.min(2 + Math.floor(level/30), 10),
+    requiredKills: Math.min(4 + Math.floor(level/25), 25),
+    coinMin: Math.round(10 + level*0.045),
+    coinMax: Math.round(25 + level*0.09),
+    attackInterval: Math.max(4200 - level*0.28, 1300),
+    attackDmgMin: 3 + Math.min(Math.floor(level/60),14),
+    attackDmgMax: 8 + Math.min(Math.floor(level/45),22),
+    fastChance: level>=15 ? 0.28 : 0,
+    tankChance: level>=40 ? 0.20 : 0,
+    turnJitter: clamp(0.02 + level*0.00004, 0.02, 0.14),
+  };
+}
+
+/* ======================= SOUND (WebAudio synth) ======================= */
+let actx=null;
+function audioCtx(){ if(!actx){ try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } return actx; }
+function tone(freq,dur,type,vol,delay){
+  if(!state.soundOn) return;
+  const ctx=audioCtx(); if(!ctx) return;
+  delay = delay||0;
+  const t0=ctx.currentTime+delay;
+  const o=ctx.createOscillator(); const g=ctx.createGain();
+  o.type=type||'square'; o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime((vol||0.15),t0);
+  g.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t0); o.stop(t0+dur+0.02);
+}
+const sfx = {
+  shoot: ()=>tone(rand(500,650),0.06,'square',0.08),
+  hit: ()=>tone(rand(180,240),0.07,'sawtooth',0.10),
+  defeat: ()=>{tone(300,0.09,'triangle',0.14); tone(180,0.12,'triangle',0.10,0.06);},
+  coin: ()=>{tone(880,0.05,'square',0.08); tone(1180,0.07,'square',0.08,0.05);},
+  buy: ()=>{tone(520,0.08,'triangle',0.12); tone(780,0.1,'triangle',0.12,0.08);},
+  shieldBlock: ()=>tone(220,0.12,'sine',0.15),
+  levelUp: ()=>{[523,659,784,1046].forEach((f,i)=>tone(f,0.14,'triangle',0.14,i*0.09));},
+  bossWarn: ()=>{tone(120,0.4,'sawtooth',0.18); tone(100,0.4,'sawtooth',0.18,0.2);},
+  hurt: ()=>tone(110,0.15,'sawtooth',0.14),
+  victory: ()=>{[523,659,784,1046,1318].forEach((f,i)=>tone(f,0.22,'triangle',0.16,i*0.14));},
+};
+function startBossMusic(){
+  stopBossMusic();
+  const notes=[110,110,146,110];
+  let i=0;
+  bossMusicTimer=setInterval(()=>{ if(state.soundOn) tone(notes[i%notes.length],0.28,'sawtooth',0.06); i++; },420);
+}
+function stopBossMusic(){ if(bossMusicTimer){clearInterval(bossMusicTimer); bossMusicTimer=null;} }
+
+/* ======================= SAVE / LOAD ======================= */
+const SAVE_KEY = 'zombie_clicker_save_v1';
+async function saveGame(){
+  try{
+    const payload = JSON.stringify(state);
+    localStorage.setItem(SAVE_KEY, payload);
+  }catch(e){ /* best effort — storage may be unavailable/full */ }
+}
+async function loadGame(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw){
+      const loaded = JSON.parse(raw);
+      Object.assign(state, loaded);
+    }
+  }catch(e){ /* no save yet, or corrupted — start fresh */ }
+}
+async function resetGame(){
+  state = {
+    level:1, highestLevel:1, coins:0, totalCoinsEarned:0, score:0,
+    totalZombiesDefeated:0, playTimeSeconds:0, gunsOwned:['basic'], equippedGun:'basic',
+    shieldsOwned:[], equippedShield:null, soundOn:state.soundOn, finished:false,
+    highScore:0, challengeBest:0,
+  };
+  playerHP = MAX_PLAYER_HP; shieldHP=0;
+  await saveGame();
+  startLevel(state.level, true);
+  updateHUD();
+}
+
+/* ======================= CANVAS SETUP ======================= */
+const canvas = document.getElementById('gameCanvas');
+const ctx2d = canvas.getContext('2d');
+const canvasWrap = document.getElementById('canvasWrap');
+function resizeCanvas(){
+  const r = canvasWrap.getBoundingClientRect();
+  canvas.width = r.width; canvas.height = r.height;
+}
+window.addEventListener('resize', resizeCanvas);
+
+/* ======================= ENTITIES ======================= */
+let zombies = [];
+let particles = []; // {type,x,y,vx,vy,life,maxLife,...}
+let zIdCounter = 1;
+
+const ZOMBIE_EMOJI = { normal:'🧟', fast:'🧟\u200d♀️', tank:'🧟\u200d♂️' };
+
+function pickZombieType(cfg){
+  const r = Math.random();
+  if(r < cfg.tankChance) return 'tank';
+  if(r < cfg.tankChance + cfg.fastChance) return 'fast';
+  return 'normal';
+}
+
+function spawnZombie(){
+  const cfg = getLevelConfig(state.level);
+  const cap = challengeActive ? Math.max(cfg.maxOnScreen, 8) : cfg.maxOnScreen;
+  if(zombies.length >= cap || bossActive || gamePaused) return;
+  const type = pickZombieType(cfg);
+  let hpMult=1, sizeMult=1, speedMult=1, coinMult=1;
+  if(type==='fast'){ hpMult=0.6; speedMult=1.7; coinMult=1.4; sizeMult=0.85; }
+  if(type==='tank'){ hpMult=1.9; speedMult=0.55; coinMult=1.8; sizeMult=1.35; }
+  const w = canvas.width, h = canvas.height;
+  const edge = randInt(0,3);
+  let x,y;
+  if(edge===0){x=rand(0,w); y=-30;}
+  else if(edge===1){x=w+30; y=rand(0,h);}
+  else if(edge===2){x=rand(0,w); y=h+30;}
+  else {x=-30; y=rand(0,h);}
+  const speed = rand(cfg.speedMin, cfg.speedMax)*speedMult;
+  const ang = Math.random()*Math.PI*2;
+  const hp = Math.round(cfg.zombieHP*hpMult);
+  zombies.push({
+    id: zIdCounter++, type, x, y, vx:Math.cos(ang)*speed, vy:Math.sin(ang)*speed,
+    hp, maxHp:hp, size: 26*sizeMult, coinMult,
+    attackTimer: rand(1500,cfg.attackInterval), warning:false, warnTimer:0, hitFlash:0,
+  });
+}
+
+function spawnBoss(level){
+  const idx = BOSS_LEVELS.indexOf(level);
+  const hp = 150;
+  const speed = 55 + idx*16;
+  const w=canvas.width,h=canvas.height;
+  boss = {
+    id: 'boss', x:w/2, y:-80, vx:0, vy:0, hp, maxHp:hp, size: level===MAX_LEVEL?70:56,
+    speed, attackTimer: Math.max(2600 - idx*140, 900), attackInterval: Math.max(2600-idx*140,900),
+    warning:false, warnTimer:0, hitFlash:0, dirTimer:0, isFinal: level===MAX_LEVEL,
+  };
+  bossActive = true;
+  document.getElementById('bossWrap').style.display='block';
+  document.getElementById('bossName').textContent = boss.isFinal ? '👹 FINAL BOSS' : '👹 BOSS ZOMBIE';
+}
+
+/* ======================= DAMAGE / KILL ======================= */
+function spawnDamageNumber(x,y,dmg,color){
+  particles.push({type:'dmg', x, y, vy:-40, life:0, maxLife:0.7, text:'-'+dmg, color: color||'#fff'});
+}
+function spawnPop(x,y,color){
+  for(let i=0;i<10;i++){
+    const ang=Math.random()*Math.PI*2, spd=rand(60,160);
+    particles.push({type:'spark', x,y, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd, life:0, maxLife:rand(.35,.6), color: color||'#fff'});
+  }
+  particles.push({type:'star', x,y, vy:-20, life:0, maxLife:0.5});
+}
+function spawnMuzzle(x,y,color){
+  particles.push({type:'muzzle', x,y, life:0, maxLife:0.15, color});
+}
+function spawnCoinBurst(x,y,amount){
+  const targetEl = document.getElementById('coinBadge');
+  const tr = targetEl.getBoundingClientRect();
+  const cr = canvas.getBoundingClientRect();
+  const tx = tr.left+tr.width/2-cr.left, ty=tr.top+tr.height/2-cr.top;
+  const n = clamp(Math.round(amount/8),2,6);
+  for(let i=0;i<n;i++){
+    particles.push({type:'coin', x:x+rand(-10,10), y:y+rand(-10,10), tx, ty, life:0, maxLife:rand(.5,.7), delay:i*0.04});
+  }
+  setTimeout(()=>{ addCoins(amount); }, 260);
+}
+
+function addCoins(n){
+  state.coins += n; state.totalCoinsEarned += n; updateHUD(); sfx.coin();
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toast._h); toast._h=setTimeout(()=>t.classList.remove('show'),1400);
+}
+
+function damageZombieAt(clickX, clickY){
+  if(gamePaused || state.finished) return;
+  const gun = currentGun();
+  // boss first (drawn on top visually when active, and only entity)
+  if(bossActive && boss){
+    const d = Math.hypot(clickX-boss.x, clickY-boss.y);
+    if(d <= boss.size+14){
+      hitBoss(gun.dmg, clickX, clickY);
+      return;
+    }
+  }
+  for(let i=zombies.length-1;i>=0;i--){
+    const z=zombies[i];
+    const d=Math.hypot(clickX-z.x, clickY-z.y);
+    if(d <= z.size+12){
+      hitZombie(z, gun.dmg);
+      return;
+    }
+  }
+}
+
+function hitZombie(z, dmg){
+  z.hp -= dmg; z.hitFlash=0.15;
+  spawnDamageNumber(z.x, z.y-z.size, dmg, currentGun().color);
+  spawnMuzzle(z.x,z.y,currentGun().color);
+  sfx.hit();
+  if(z.hp<=0){
+    killZombie(z);
+  }
+}
+function hitBoss(dmg, cx, cy){
+  boss.hp -= dmg; boss.hitFlash=0.15;
+  spawnDamageNumber(boss.x, boss.y-boss.size, dmg, '#fff');
+  spawnMuzzle(cx,cy,currentGun().color);
+  sfx.hit();
+  updateBossBar();
+  if(boss.hp<=0){
+    killBoss();
+  }
+}
+
+function killZombie(z){
+  zombies = zombies.filter(o=>o.id!==z.id);
+  spawnPop(z.x,z.y, z.type==='tank'?'#8d6e63':(z.type==='fast'?'#00d2ff':'#7bed9f'));
+  sfx.defeat();
+  const cfg = getLevelConfig(state.level);
+  const coinAmt = Math.round(rand(cfg.coinMin,cfg.coinMax)*z.coinMult);
+  spawnCoinBurst(z.x,z.y,coinAmt);
+  state.score += Math.round(z.maxHp/2);
+  state.totalZombiesDefeated++;
+  updateHUD();
+  if(challengeActive){
+    challengeKills++;
+  } else {
+    killsThisLevel++;
+    checkLevelProgress();
+  }
+}
+
+function killBoss(){
+  const bx=boss.x, by=boss.y;
+  spawnPop(bx,by,'#ff4757'); spawnPop(bx,by-20,'#ffd32a');
+  sfx.defeat(); stopBossMusic();
+  const coinAmt = 500 + (boss.isFinal?2000:0);
+  spawnCoinBurst(bx,by,coinAmt);
+  state.score += 500;
+  state.totalZombiesDefeated++;
+  bossActive=false;
+  document.getElementById('bossWrap').style.display='none';
+  const wasFinal = boss.isFinal;
+  boss=null;
+  if(wasFinal){
+    setTimeout(()=>showVictory(), 700);
+  } else {
+    killsThisLevel = requiredKills; // triggers level up
+    checkLevelProgress();
+  }
+}
+
+/* ======================= PLAYER DAMAGE ======================= */
+function damagePlayer(amount){
+  let remaining = amount;
+  if(shieldHP>0){
+    const absorbed = Math.min(shieldHP, remaining);
+    shieldHP -= absorbed; remaining -= absorbed;
+    sfx.shieldBlock();
+    spawnPop(canvas.width/2, canvas.height-40, '#3ab0ff');
+  }
+  if(remaining>0){
+    playerHP -= remaining;
+    sfx.hurt();
+    document.getElementById('game').classList.add('shaking');
+    setTimeout(()=>document.getElementById('game').classList.remove('shaking'),350);
+  }
+  if(playerHP<=0){
+    playerHP = MAX_PLAYER_HP;
+    const lost = Math.round(state.coins*0.15);
+    state.coins = Math.max(0,state.coins-lost);
+    const sd = currentShieldDef(); shieldHP = sd?sd.hp:0;
+    toast('🩸 Swarmed! Lost '+lost+' coins — back in the fight!');
+  }
+  updateHUD();
+}
+
+/* ======================= LEVEL FLOW ======================= */
+let spawnTimer = 0;
+let bossWarnTimeout=null;
+
+function startLevel(level, silent){
+  state.level = level;
+  if(level>state.highestLevel) state.highestLevel=level;
+  killsThisLevel = 0;
+  zombies = [];
+  bossActive=false; boss=null;
+  document.getElementById('bossWrap').style.display='none';
+  document.getElementById('finalBanner').classList.toggle('show', level===MAX_LEVEL);
+  const cfg = getLevelConfig(level);
+  requiredKills = cfg.requiredKills;
+  isBossLevel = BOSS_LEVELS.includes(level);
+  const sd = currentShieldDef(); shieldHP = sd?sd.hp:0;
+  spawnTimer = 0;
+  updateHUD();
+  updateProgressBar();
+  if(isBossLevel){
+    inWarning = true;
+    document.getElementById('bossWarnOverlay').classList.add('show');
+    sfx.bossWarn();
+    if(bossWarnTimeout) clearTimeout(bossWarnTimeout);
+    bossWarnTimeout = setTimeout(()=>{
+      document.getElementById('bossWarnOverlay').classList.remove('show');
+      inWarning=false;
+      spawnBoss(level);
+      startBossMusic();
+    }, 1800);
+  }
+}
+
+function checkLevelProgress(){
+  if(state.finished) return;
+  if(isBossLevel){
+    updateProgressBar();
+    return;
+  }
+  if(killsThisLevel >= requiredKills){
+    levelUp();
+  } else {
+    updateProgressBar();
+  }
+}
+
+function levelUp(){
+  if(state.level >= MAX_LEVEL){ return; }
+  const finishedLevel = state.level;
+  let bonus = 0;
+  if(finishedLevel % 100 === 0) bonus += 2500;
+  else if(finishedLevel % 10 === 0) bonus += 250;
+  const next = finishedLevel+1;
+  sfx.levelUp();
+  document.getElementById('levelUpNum').textContent = 'Level '+next;
+  document.getElementById('levelUpCoins').textContent = bonus>0 ? ('+'+bonus+' bonus coins') : 'Onward!';
+  document.getElementById('levelUpOverlay').classList.add('show');
+  if(bonus>0) addCoins(bonus);
+  setTimeout(()=>{
+    document.getElementById('levelUpOverlay').classList.remove('show');
+    startLevel(next);
+    saveGame();
+  }, 1300);
+}
+
+function jumpToLevel(lv){
+  lv = clamp(Math.round(lv),1,MAX_LEVEL);
+  state.finished=false;
+  document.getElementById('victoryOverlay').classList.remove('show');
+  startLevel(lv);
+  saveGame();
+}
+
+/* ======================= 15-SECOND CHALLENGE ======================= */
+let challengeActive = false;
+let challengeTimeLeft = 0;
+let challengeKills = 0;
+function startChallenge(){
+  if(state.finished) return;
+  closePause();
+  challengeActive = true;
+  challengeTimeLeft = 15;
+  challengeKills = 0;
+  zombies = [];
+  bossActive = false; boss = null;
+  document.getElementById('bossWrap').style.display='none';
+  inWarning = false;
+  if(bossWarnTimeout) clearTimeout(bossWarnTimeout);
+  document.getElementById('bossWarnOverlay').classList.remove('show');
+  spawnTimer = 0;
+  document.getElementById('challengeBanner').style.display='block';
+  sfx.levelUp();
+}
+function endChallenge(){
+  challengeActive = false;
+  document.getElementById('challengeBanner').style.display='none';
+  zombies = [];
+  const bonus = challengeKills*20;
+  if(challengeKills > (state.challengeBest||0)) state.challengeBest = challengeKills;
+  if(bonus>0) addCoins(bonus);
+  toast('🏁 Challenge over — '+challengeKills+' kills, +'+bonus+' coins!');
+  startLevel(state.level);
+  saveGame();
+}
+
+/* ======================= UPDATE / RENDER LOOP ======================= */
+let lastTime = performance.now();
+let playTimeAccum = 0;
+
+function update(dt){
+  if(gamePaused || state.finished) return;
+  playTimeAccum += dt;
+  if(playTimeAccum>=1){ state.playTimeSeconds += Math.floor(playTimeAccum); playTimeAccum -= Math.floor(playTimeAccum); }
+
+  const cfg = getLevelConfig(state.level);
+  const w=canvas.width, h=canvas.height;
+
+  if(challengeActive){
+    challengeTimeLeft -= dt;
+    document.getElementById('challengeText').textContent =
+      '⏱️ '+Math.max(0,Math.ceil(challengeTimeLeft))+'s | Kills: '+challengeKills;
+    if(challengeTimeLeft<=0){
+      endChallenge();
+    } else {
+      spawnTimer -= dt*1000;
+      if(spawnTimer<=0){ spawnZombie(); spawnTimer = 450; }
+    }
+  } else if(!isBossLevel && !inWarning){
+    spawnTimer -= dt*1000;
+    if(spawnTimer<=0){ spawnZombie(); spawnTimer = cfg.spawnInterval; }
+  }
+
+  // zombies movement
+  for(const z of zombies){
+    z.x += z.vx*dt; z.y += z.vy*dt;
+    if(z.x<z.size){z.x=z.size; z.vx=Math.abs(z.vx);}
+    if(z.x>w-z.size){z.x=w-z.size; z.vx=-Math.abs(z.vx);}
+    if(z.y<z.size+4){z.y=z.size+4; z.vy=Math.abs(z.vy);}
+    if(z.y>h-z.size){z.y=h-z.size; z.vy=-Math.abs(z.vy);}
+    // random jitter turn
+    if(Math.random()<cfg.turnJitter){
+      const ang = Math.atan2(z.vy,z.vx) + rand(-1,1);
+      const spd = Math.hypot(z.vx,z.vy);
+      z.vx=Math.cos(ang)*spd; z.vy=Math.sin(ang)*spd;
+    }
+    if(z.hitFlash>0) z.hitFlash-=dt;
+    // attack telegraph
+    if(!z.warning){
+      z.attackTimer -= dt*1000;
+      if(z.attackTimer<=0){ z.warning=true; z.warnTimer=600; }
+    } else {
+      z.warnTimer -= dt*1000;
+      if(z.warnTimer<=0){
+        z.warning=false; z.attackTimer=cfg.attackInterval;
+        const dmg = randInt(cfg.attackDmgMin,cfg.attackDmgMax);
+        damagePlayer(dmg);
+      }
+    }
+  }
+
+  // boss movement (chases roughly toward center-ish random point, faster)
+  if(bossActive && boss){
+    boss.dirTimer -= dt*1000;
+    if(boss.dirTimer<=0){
+      const ang = Math.random()*Math.PI*2;
+      boss.vx = Math.cos(ang)*boss.speed; boss.vy=Math.sin(ang)*boss.speed;
+      boss.dirTimer = rand(700,1400);
+    }
+    boss.x += boss.vx*dt; boss.y += boss.vy*dt;
+    if(boss.x<boss.size) {boss.x=boss.size; boss.vx=Math.abs(boss.vx);}
+    if(boss.x>w-boss.size){boss.x=w-boss.size; boss.vx=-Math.abs(boss.vx);}
+    if(boss.y<boss.size+4){boss.y=boss.size+4; boss.vy=Math.abs(boss.vy);}
+    if(boss.y>h-boss.size){boss.y=h-boss.size; boss.vy=-Math.abs(boss.vy);}
+    if(boss.hitFlash>0) boss.hitFlash-=dt;
+    if(!boss.warning){
+      boss.attackTimer -= dt*1000;
+      if(boss.attackTimer<=0){ boss.warning=true; boss.warnTimer=700; }
+    } else {
+      boss.warnTimer -= dt*1000;
+      if(boss.warnTimer<=0){
+        boss.warning=false; boss.attackTimer=boss.attackInterval;
+        const idx=BOSS_LEVELS.indexOf(state.level);
+        const dmg = randInt(10+idx*2, 18+idx*3);
+        damagePlayer(dmg);
+      }
+    }
+  }
+
+  // particles
+  for(const p of particles){
+    p.life += dt;
+    if(p.delay && p.delay>0){ p.delay-=dt; continue; }
+    if(p.type==='dmg'){ p.y += p.vy*dt; }
+    else if(p.type==='spark'){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy += 220*dt; }
+    else if(p.type==='star'){ p.y += p.vy*dt; }
+    else if(p.type==='coin'){
+      const t = clamp(p.life/p.maxLife,0,1);
+      p.cx = p.x + (p.tx-p.x)*t; p.cy = p.y + (p.ty-p.y)*t - Math.sin(t*Math.PI)*40;
+    }
+  }
+  particles = particles.filter(p=> p.life < p.maxLife);
+}
+
+function drawZombie(z){
+  ctx2d.save();
+  ctx2d.translate(z.x,z.y);
+  if(z.warning){
+    ctx2d.beginPath();
+    ctx2d.arc(0,0,z.size+8+Math.sin(performance.now()/60)*3,0,Math.PI*2);
+    ctx2d.strokeStyle='rgba(255,60,60,'+(0.6+0.3*Math.sin(performance.now()/80))+')';
+    ctx2d.lineWidth=4; ctx2d.stroke();
+  }
+  const scale = z.hitFlash>0 ? 1.15:1;
+  ctx2d.scale(scale,scale);
+  // body circle
+  let bg = z.type==='tank' ? '#6d4c2f' : (z.type==='fast' ? '#0e8fa8' : '#2f7a3d');
+  if(z.hitFlash>0) bg='#ffffff';
+  ctx2d.beginPath(); ctx2d.arc(0,0,z.size,0,Math.PI*2);
+  ctx2d.fillStyle=bg; ctx2d.fill();
+  ctx2d.lineWidth=4; ctx2d.strokeStyle='#0a0a12'; ctx2d.stroke();
+  ctx2d.font=(z.size*1.5)+'px serif';
+  ctx2d.textAlign='center'; ctx2d.textBaseline='middle';
+  ctx2d.fillText(ZOMBIE_EMOJI[z.type]||'🧟',0,2);
+  ctx2d.restore();
+  // mini hp bar
+  const bw=z.size*1.8;
+  ctx2d.fillStyle='rgba(0,0,0,0.5)'; ctx2d.fillRect(z.x-bw/2, z.y-z.size-14, bw, 6);
+  ctx2d.fillStyle='#ff4757'; ctx2d.fillRect(z.x-bw/2, z.y-z.size-14, bw*clamp(z.hp/z.maxHp,0,1), 6);
+}
+
+function drawBoss(){
+  if(!boss) return;
+  ctx2d.save();
+  ctx2d.translate(boss.x,boss.y);
+  if(boss.warning){
+    ctx2d.beginPath();
+    ctx2d.arc(0,0,boss.size+14+Math.sin(performance.now()/50)*4,0,Math.PI*2);
+    ctx2d.strokeStyle='rgba(255,20,20,'+(0.7+0.3*Math.sin(performance.now()/70))+')';
+    ctx2d.lineWidth=6; ctx2d.stroke();
+  }
+  const scale = boss.hitFlash>0?1.08:1;
+  ctx2d.scale(scale,scale);
+  ctx2d.beginPath(); ctx2d.arc(0,0,boss.size,0,Math.PI*2);
+  ctx2d.fillStyle= boss.hitFlash>0 ? '#ffffff' : (boss.isFinal?'#5c0a0a':'#7a1c1c');
+  ctx2d.fill();
+  ctx2d.lineWidth=6; ctx2d.strokeStyle='#0a0a12'; ctx2d.stroke();
+  ctx2d.font=(boss.size*1.6)+'px serif'; ctx2d.textAlign='center'; ctx2d.textBaseline='middle';
+  ctx2d.fillText('👹',0,4);
+  ctx2d.restore();
+}
+
+function drawParticles(){
+  for(const p of particles){
+    if(p.delay && p.delay>0) continue;
+    const t = clamp(p.life/p.maxLife,0,1);
+    if(p.type==='dmg'){
+      ctx2d.globalAlpha = 1-t;
+      ctx2d.font='bold 20px Verdana'; ctx2d.fillStyle=p.color; ctx2d.textAlign='center';
+      ctx2d.strokeStyle='#000'; ctx2d.lineWidth=3;
+      ctx2d.strokeText(p.text, p.x, p.y);
+      ctx2d.fillText(p.text, p.x, p.y);
+      ctx2d.globalAlpha=1;
+    } else if(p.type==='spark'){
+      ctx2d.globalAlpha=1-t;
+      ctx2d.fillStyle=p.color;
+      ctx2d.beginPath(); ctx2d.arc(p.x,p.y,5*(1-t)+2,0,Math.PI*2); ctx2d.fill();
+      ctx2d.globalAlpha=1;
+    } else if(p.type==='star'){
+      ctx2d.globalAlpha=1-t;
+      ctx2d.font=(24+t*10)+'px serif'; ctx2d.textAlign='center';
+      ctx2d.fillText('✨', p.x, p.y);
+      ctx2d.globalAlpha=1;
+    } else if(p.type==='muzzle'){
+      ctx2d.globalAlpha=1-t;
+      ctx2d.strokeStyle=p.color||'#fff'; ctx2d.lineWidth=3;
+      ctx2d.beginPath(); ctx2d.arc(p.x,p.y,10+t*20,0,Math.PI*2); ctx2d.stroke();
+      ctx2d.globalAlpha=1;
+    } else if(p.type==='coin'){
+      ctx2d.font='20px serif'; ctx2d.textAlign='center';
+      ctx2d.fillText('🪙', p.cx!==undefined?p.cx:p.x, p.cy!==undefined?p.cy:p.y);
+    }
+  }
+}
+
+function render(){
+  const w=canvas.width, h=canvas.height;
+  ctx2d.clearRect(0,0,w,h);
+  // subtle halftone dots background
+  ctx2d.save();
+  ctx2d.globalAlpha=0.06;
+  for(let gx=0; gx<w; gx+=26){
+    for(let gy=0; gy<h; gy+=26){
+      ctx2d.beginPath(); ctx2d.arc(gx,gy,2,0,Math.PI*2); ctx2d.fillStyle='#000'; ctx2d.fill();
+    }
+  }
+  ctx2d.restore();
+  for(const z of zombies) drawZombie(z);
+  if(bossActive) drawBoss();
+  drawParticles();
+}
+
+function loop(now){
+  const dt = Math.min((now-lastTime)/1000, 0.05);
+  lastTime = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+/* ======================= HUD ======================= */
+function updateHUD(){
+  document.getElementById('levelVal').textContent = state.level>=MAX_LEVEL ? '10000 (FINAL)' : state.level;
+  document.getElementById('coinVal').textContent = state.coins;
+  document.getElementById('scoreVal').textContent = state.score;
+  if(state.score > (state.highScore||0)) state.highScore = state.score;
+  const bestEl = document.getElementById('bestScoreVal');
+  if(bestEl) bestEl.textContent = state.highScore||0;
+  const bestChEl = document.getElementById('bestChallengeVal');
+  if(bestChEl) bestChEl.textContent = state.challengeBest||0;
+  document.getElementById('hpFill').style.width = clamp(playerHP/MAX_PLAYER_HP*100,0,100)+'%';
+  const sd = currentShieldDef();
+  const maxShield = sd?sd.hp:0;
+  document.getElementById('shieldFill').style.width = maxShield>0 ? clamp(shieldHP/maxShield*100,0,100)+'%' : '0%';
+  const gun = currentGun();
+  document.getElementById('gunName').textContent = gun.name;
+  document.getElementById('gunDmg').textContent = gun.dmg;
+  document.getElementById('gunIcon').style.color = gun.color;
+}
+function updateProgressBar(){
+  if(isBossLevel){
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('progressFill').style.background='linear-gradient(90deg,#ff4757,#ff9f43)';
+  } else {
+    document.getElementById('progressFill').style.background='linear-gradient(90deg,#2ed573,#7bed9f)';
+    document.getElementById('progressFill').style.width = clamp(killsThisLevel/requiredKills*100,0,100)+'%';
+  }
+}
+function updateBossBar(){
+  if(!boss) return;
+  document.getElementById('bossFill').style.width = clamp(boss.hp/boss.maxHp*100,0,100)+'%';
+}
+setInterval(updateBossBar, 100);
+
+/* ======================= SHOP ======================= */
+let shopTab='guns';
+function renderShop(){
+  const list = document.getElementById('shopList');
+  list.innerHTML='';
+  if(shopTab==='guns'){
+    WEAPONS.forEach((w,idx)=>{
+      const owned = state.gunsOwned.includes(w.id);
+      const equipped = state.equippedGun===w.id;
+      const prevOwned = idx===0 || state.gunsOwned.includes(WEAPONS[idx-1].id);
+      const row=document.createElement('div'); row.className='shopItem';
+      let btnHtml='';
+      if(equipped){ btnHtml='<div class="shopBtnItem st-equipped">EQUIPPED</div>'; }
+      else if(owned){ btnHtml='<div class="shopBtnItem st-equip" data-act="equip-gun" data-id="'+w.id+'">EQUIP</div>'; }
+      else if(!prevOwned){ btnHtml='<div class="shopBtnItem st-locked">🔒 LOCKED</div>'; }
+      else { btnHtml='<div class="shopBtnItem st-buy" data-act="buy-gun" data-id="'+w.id+'">BUY '+w.price+'🪙</div>'; }
+      row.innerHTML = '<div class="shopIcon" style="color:'+w.color+'">🔫</div>'+
+        '<div class="shopInfo"><div class="name">'+w.name+'</div><div class="stat">💥 '+w.dmg+' dmg/hit'+(w.price>0?(' • '+w.price+' coins'):' • Free')+'</div></div>'+btnHtml;
+      list.appendChild(row);
+    });
+  } else {
+    SHIELDS.forEach((s)=>{
+      const owned = state.shieldsOwned.includes(s.id);
+      const equipped = state.equippedShield===s.id;
+      const row=document.createElement('div'); row.className='shopItem';
+      let btnHtml='';
+      if(equipped){ btnHtml='<div class="shopBtnItem st-equipped">EQUIPPED</div>'; }
+      else if(owned){ btnHtml='<div class="shopBtnItem st-equip" data-act="equip-shield" data-id="'+s.id+'">EQUIP</div>'; }
+      else { btnHtml='<div class="shopBtnItem st-buy" data-act="buy-shield" data-id="'+s.id+'">BUY '+s.price+'🪙</div>'; }
+      row.innerHTML = '<div class="shopIcon">🛡️</div>'+
+        '<div class="shopInfo"><div class="name">'+s.name+'</div><div class="stat">🛡️ '+s.hp+' HP • '+s.price+' coins</div></div>'+btnHtml;
+      list.appendChild(row);
+    });
+  }
+}
+document.getElementById('shopList').addEventListener('click', (e)=>{
+  const el = e.target.closest('[data-act]');
+  if(!el) return;
+  const act = el.dataset.act, id = el.dataset.id;
+  if(act==='buy-gun'){
+    const w = WEAPONS.find(x=>x.id===id);
+    if(state.coins < w.price){ toast('Not enough coins!'); return; }
+    state.coins -= w.price; state.gunsOwned.push(id); state.equippedGun=id;
+    sfx.buy(); updateHUD(); renderShop(); saveGame();
+  } else if(act==='equip-gun'){
+    state.equippedGun=id; updateHUD(); renderShop(); saveGame(); sfx.buy();
+  } else if(act==='buy-shield'){
+    const s = SHIELDS.find(x=>x.id===id);
+    if(state.coins < s.price){ toast('Not enough coins!'); return; }
+    state.coins -= s.price; state.shieldsOwned.push(id); state.equippedShield=id;
+    shieldHP = s.hp;
+    sfx.buy(); updateHUD(); renderShop(); saveGame();
+  } else if(act==='equip-shield'){
+    state.equippedShield=id; const s=SHIELDS.find(x=>x.id===id); shieldHP=s.hp;
+    updateHUD(); renderShop(); saveGame(); sfx.buy();
+  }
+});
+document.getElementById('tabGuns').onclick=()=>{shopTab='guns'; document.getElementById('tabGuns').classList.add('active'); document.getElementById('tabShields').classList.remove('active'); renderShop();};
+document.getElementById('tabShields').onclick=()=>{shopTab='shields'; document.getElementById('tabShields').classList.add('active'); document.getElementById('tabGuns').classList.remove('active'); renderShop();};
+
+function openShop(){ renderShop(); document.getElementById('shopOverlay').classList.add('show'); gamePaused=true; }
+function closeShop(){ document.getElementById('shopOverlay').classList.remove('show'); gamePaused=false; }
+document.getElementById('shopBtn').onclick=openShop;
+document.getElementById('shopIconBtn').onclick=openShop;
+document.getElementById('shopClose').onclick=closeShop;
+
+/* ======================= PAUSE / RESET ======================= */
+function openPause(){ document.getElementById('pauseOverlay').classList.add('show'); gamePaused=true; }
+function closePause(){ document.getElementById('pauseOverlay').classList.remove('show'); gamePaused=false; }
+document.getElementById('pauseBtn').onclick=openPause;
+document.getElementById('pauseClose').onclick=closePause;
+document.getElementById('resumeBtn').onclick=closePause;
+document.getElementById('soundBtn').onclick=function(){
+  state.soundOn=!state.soundOn;
+  this.textContent = '🔊 Sound: '+(state.soundOn?'ON':'OFF');
+  saveGame();
+};
+document.getElementById('challengeBtn').onclick=startChallenge;
+document.getElementById('jumpBtn').onclick=function(){
+  const v = parseInt(document.getElementById('jumpInput').value,10);
+  if(!isNaN(v)){ jumpToLevel(v); closePause(); }
+};
+document.getElementById('resetBtn').onclick=function(){
+  document.getElementById('confirmOverlay').classList.add('show');
+};
+document.getElementById('confirmNo').onclick=function(){ document.getElementById('confirmOverlay').classList.remove('show'); };
+document.getElementById('confirmYes').onclick=async function(){
+  document.getElementById('confirmOverlay').classList.remove('show');
+  closePause();
+  await resetGame();
+};
+
+/* ======================= VICTORY ======================= */
+function fmtTime(sec){
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  return (h>0?h+'h ':'')+m+'m '+s+'s';
+}
+function showVictory(){
+  state.finished=true;
+  sfx.victory();
+  document.getElementById('vScore').textContent = state.score;
+  document.getElementById('vZombies').textContent = state.totalZombiesDefeated;
+  document.getElementById('vCoins').textContent = state.totalCoinsEarned;
+  const gun = WEAPONS.filter(w=>state.gunsOwned.includes(w.id)).pop();
+  document.getElementById('vGun').textContent = gun?gun.name:'-';
+  const shield = SHIELDS.filter(s=>state.shieldsOwned.includes(s.id)).pop();
+  document.getElementById('vShield').textContent = shield?shield.name:'None';
+  document.getElementById('vTime').textContent = fmtTime(state.playTimeSeconds);
+  document.getElementById('victoryOverlay').classList.add('show');
+  saveGame();
+}
+document.getElementById('victoryClose').onclick=function(){
+  document.getElementById('victoryOverlay').classList.remove('show');
+};
+
+/* ======================= INPUT ======================= */
+function getCanvasPos(evt){
+  const r = canvas.getBoundingClientRect();
+  let clientX,clientY;
+  if(evt.touches && evt.touches.length){ clientX=evt.touches[0].clientX; clientY=evt.touches[0].clientY; }
+  else { clientX=evt.clientX; clientY=evt.clientY; }
+  return { x: clientX-r.left, y: clientY-r.top };
+}
+canvas.addEventListener('pointerdown', (e)=>{
+  if(gamePaused || state.finished) return;
+  const p = getCanvasPos(e);
+  sfx.shoot();
+  damageZombieAt(p.x,p.y);
+});
+
+/* ======================= TOAST STYLE FIX ======================= */
+// (toast function defined above)
+
+/* ======================= INIT ======================= */
+async function init(){
+  resizeCanvas();
+  await loadGame();
+  playerHP = MAX_PLAYER_HP;
+  const sd = currentShieldDef();
+  shieldHP = sd ? sd.hp : 0;
+  document.getElementById('soundBtn').textContent = '🔊 Sound: '+(state.soundOn?'ON':'OFF');
+  if(state.level>=MAX_LEVEL && state.finished){
+    startLevel(state.level, true);
+    showVictory();
+  } else {
+    startLevel(state.level, true);
+  }
+  updateHUD();
+  requestAnimationFrame((t)=>{ lastTime=t; requestAnimationFrame(loop); });
+  setInterval(saveGame, 15000);
+}
+init();
+
+})();
+</script>
+</body>
+</html>
